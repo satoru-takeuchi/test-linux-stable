@@ -10,28 +10,41 @@ tools for testing linux stable
 * Summary
 
   This tool is for testing stable kernel automaticall. If you run
-  this tool, you can boot, install, boot, and run any test as you
+  this tool, you can build, install, boot, and run any test as you
   like with any release candidate stable kernels.
 
 * Pre-requirement to run this tool.
 
- - The host machine and a guest machine running on this host.
+ - A host machine and a guest machine running on that host.
    Both are x86_64 system.
  - Host side:
-   - You can can access to guest via virsh console.
-   - You can access to root@guest via ssh without any password/passphrase.
-   - You can reboot guest via virsh destroy and virsh start.
+   - You can connect to guest's console via
+     "virsh console <guest name>".
+   - You can connect to "root@guest" via ssh without any
+     password/passphrase.
+
+       NOTE:
+       If password/passphrase are absolutely is needed,
+       this tools works fine, however, you need to input
+       them many time.
+   - You can reboot the guest via
+     "virsh destroy/start <guest name>".
  - Guest side:
    - grub2 is used as bootloader.
    - grub-reboot or grub2-reboot works properly.
 
 * Usage
 
-1. Add the entry for test kernel in the guest's config file
-   of grub2 as root. Here is the example of my debian/jessy
-   system. The detail would be different with other distros.
+1. Edit the grub2 configuration file (only once).
+
+   In the guest machine, add the entry for test kernel in the
+   grub2's config file. Here is the example of my debian/jessy
+   system's config file. Although the detail would be different
+   with other distros, the name of menuentry, vmlinuz image,
+   and initrd image shouldn't be changed.
    
 ===============================================
+...
 menuentry 'test-stable' {
         ...
         echo    'Loading test-stable kernel ...'
@@ -39,26 +52,38 @@ menuentry 'test-stable' {
         echo    'Loading initial ramdisk ...'
         initrd  /boot/initrd.img-test-stable
 }
+...
 ===============================================
 
 2. Move to the top directory of this tool.
+
+  Run the following command.
 
 ============================
 $ cd test-linux-stable
 ============================
 
-3. Tweak the configuration file, test-linux-stable.conf in this directory.
-   Please set each option with reading the comment above each ones.
+3. Edit this tool's configuration file (sometimes).
+
+  Tweak this tool's configuration file, "test-linux-stable.conf".
+  Please refer to the comments in this file here.
 
 ====================================
 $ ${EDITOR} test-linux-stable.conf
 ====================================
 
-4. Run test with setting the kernel version which you want to test.
+4. Run the test.
+
+  Run this tool with setting the test target kernel version.
 
 ==================================
+$ bin/test-linux-stable <version>
+==================================
+
+  Here is the example of testing 3.12.2-rc1.
+
+===================================
 $ bin/test-linux-stable 3.12.2-rc1
-==================================
+===================================
 
-  This program get stable-rc kernel, configure, build, boot, and run your own test
-  automatically. The test result is in log/test-stable.log
+  The test result is in log/test-stable.log
