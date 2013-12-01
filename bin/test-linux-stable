@@ -1,0 +1,88 @@
+#!/bin/bash -x
+
+. test-linux-stable.conf
+
+STABLE_GIT_REPO=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
+PATCH_DIR=${PWD}/patches
+BASE_KTEST_CONFIG_FILE=${PWD}/ktest.conf.base
+KTEST_CONFIG_FILE=${PWD}/ktest.conf
+
+function set_ktest_options {
+    CONCURRENT_LEVEL=$(($(grep -c processor /proc/cpuinfo)*2))
+
+    cp ${BASE_KTEST_CONFIG_FILE} ${KTEST_CONFIG_FILE}
+    sed -i "s|@@MACHINE@@|${MACHINE}|" ${KTEST_CONFIG_FILE}
+    sed -i "s|@@CONCURRENT_LEVEL@@|${CONCURRENT_LEVEL}|" ${KTEST_CONFIG_FILE}
+    sed -i "s|@@BUILD_DIR@@|${GIT_REPO_DIR}|" ${KTEST_CONFIG_FILE}
+    sed -i "s|@@BUILD_TYPE@@|${BUILD_TYPE}|" ${KTEST_CONFIG_FILE}
+    sed -i "s|@@MIN_CONFIG@@|${BASE_KERNEL_CONFIG_FILE}|" ${KTEST_CONFIG_FILE}
+    sed -i "s|@@GRUB_FILE@@|${GRUB_CONFIG_FILE}|" ${KTEST_CONFIG_FILE}
+    sed -i "s|@@GRUB_REBOOT@@|${GRUB_REBOOT}|" ${KTEST_CONFIG_FILE}
+    sed -i "s|@@MKINITRD@@|${MKINITRD}|" ${KTEST_CONFIG_FILE}
+}
+
+function get_patch {
+    PATCH_FILE=patch-${VERSION}
+
+    pushd $PATCH_DIR
+    if [ ! -f ${PATCH_FILE} ] ; then
+	if [ ! -f ${PATCH_FILE}.bz2 ] ; then
+	    wget http://kernel.org/pub/linux/kernel/v3.0/stable-review/${PATCH_FILE}.bz2 -O ${PATCH_FILE}.bz2
+	fi
+	bunzip2 ${PATCH_FILE}.bz2
+    fi
+    popd
+}
+
+function apply_patch {
+    [[ $VERSION =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]]
+    X_VERSION=${BASH_REMATCH[1]}
+    Y_VERSION=${BASH_REMATCH[2]}
+    Z_VERSION=${BASH_REMATCH[3]}
+
+    if [ $Z_VERSION = 1 ] ; then
+	LAST_STABLE_VERSION="${X_VERSION}.${Y_VERSION}"
+    else
+	LAST_STABLE_VERSION="${X_VERSION}.${Y_VERSION}.$((Z_VERSION - 1))"
+    fi
+
+    pushd ${GIT_REPO_DIR}
+    git checkout master
+    git pull
+    git checkout v${LAST_STABLE_VERSION}
+    git branch -D v${VERSION} || :
+    git checkout -b v${VERSION}
+    git apply ${PATCH_DIR}/${PATCH_FILE}
+    git commit -a -m "v${VERSION}"
+    popd
+}
+
+function run_test {
+    ${KTEST} ${KTEST_CONFIG_FILE}
+}
+
+while getopts "c:" flag ; do
+    case ${flag} in
+	c)
+	    CONFIG_FILE=${OPTARG}
+	    ;;
+    esac
+done
+
+shift $(($OPTIND - 1))
+
+if [ $# -lt 1 ] ; then
+  echo "usage: $0 [options] <version>" >&2
+  exit 1
+fi
+
+if [ ! -d ${GIT_REPO_DIR} ] ; then
+    git clone ${STABLE_GIT_REPO}
+fi
+
+VERSION=$1
+
+set_ktest_options
+get_patch
+apply_patch
+run_test

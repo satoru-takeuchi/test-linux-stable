@@ -1,0 +1,35 @@
+DEFAULTS
+MACHINE = @@MACHINE@@
+
+LOG_FILE = ${PWD}/log/test-stable.log
+CLEAR_LOG = 1
+
+LOCALVERSION = -test-stable
+BUILD_DIR = @@BUILD_DIR@@
+OUTPUT_DIR = ${PWD}/build
+MIN_CONFIG = @@MIN_CONFIG@@
+BUILD_TYPE= @@BUILD_TYPE@@
+BUILD_OPTIONS = -j@@CONCURRENT_LEVEL@@
+BUILD_TARGET = arch/x86/boot/bzImage
+TARGET_IMAGE = /boot/vmlinuz-test-stable
+
+POST_INSTALL = ssh ${SSH_USER}@${MACHINE} @@MKINITRD@@
+
+CONSOLE = virsh console ${MACHINE}
+CLOSE_CONSOLE_SIGNAL = KILL
+SSH_USER = root
+
+POWER_CYCLE = virsh destroy ${MACHINE}; sleep 5; virsh start ${MACHINE}
+
+REBOOT_ON_ERROR = 1
+REBOOT_TYPE = grub2
+GRUB_MENU = test-stable
+GRUB_FILE = @@GRUB_FILE@@
+GRUB_REBOOT = @@GRUB_REBOOT@@
+
+TEST_START
+
+TEST_TYPE = boot
+#
+#TEST_TYPE = test
+#TEST = ssh ${SSH_USER}@${MACHINE} echo hello
