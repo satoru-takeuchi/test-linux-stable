@@ -1,4 +1,4 @@
 clean:
-	rm -rf *~ ktest.config log patches build linux-stable bin/*~
+	rm -rf *~ ktest.conf log patches build linux-stable bin/*~
 
 .PHONY: clean
