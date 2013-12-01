@@ -6,6 +6,15 @@ STABLE_GIT_REPO=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stabl
 PATCH_DIR=${PWD}/patches
 BASE_KTEST_CONFIG_FILE=${PWD}/ktest.conf.base
 KTEST_CONFIG_FILE=${PWD}/ktest.conf
+LOG_DIR=${PWD}/log
+OUTPUT_DIR=${PWD}/build
+
+function make_directories {
+    mkdir LOG_DIR
+    mkdir -p ${LOG_DIR}
+    mkdir -p ${PATCH_DIR}
+    mkdir -p ${OUTPUT_DIR}
+}
 
 function set_ktest_options {
     CONCURRENT_LEVEL=$(($(grep -c processor /proc/cpuinfo)*2))
@@ -14,6 +23,7 @@ function set_ktest_options {
     sed -i "s|@@MACHINE@@|${MACHINE}|" ${KTEST_CONFIG_FILE}
     sed -i "s|@@CONCURRENT_LEVEL@@|${CONCURRENT_LEVEL}|" ${KTEST_CONFIG_FILE}
     sed -i "s|@@BUILD_DIR@@|${GIT_REPO_DIR}|" ${KTEST_CONFIG_FILE}
+    sed -i "s|@@OUTPUT_DIR@@|${OUTPUT_DIR}|" ${KTEST_CONFIG_FILE}
     sed -i "s|@@BUILD_TYPE@@|${BUILD_TYPE}|" ${KTEST_CONFIG_FILE}
     sed -i "s|@@MIN_CONFIG@@|${BASE_KERNEL_CONFIG_FILE}|" ${KTEST_CONFIG_FILE}
     sed -i "s|@@GRUB_FILE@@|${GRUB_CONFIG_FILE}|" ${KTEST_CONFIG_FILE}
@@ -82,6 +92,7 @@ fi
 
 VERSION=$1
 
+make_directories
 set_ktest_options
 get_patch
 apply_patch
