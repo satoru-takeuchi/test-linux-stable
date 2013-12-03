@@ -10,7 +10,6 @@ LOG_DIR=${PWD}/log
 OUTPUT_DIR=${PWD}/build
 
 function make_directories {
-    mkdir LOG_DIR
     mkdir -p ${LOG_DIR}
     mkdir -p ${PATCH_DIR}
     mkdir -p ${OUTPUT_DIR}
