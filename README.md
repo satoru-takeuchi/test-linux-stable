@@ -1,7 +1,7 @@
 test-linux-stable
 =================
 
-tools for testing linux stable
+A tool for testing linux stable kernel
 
 * Author
 
@@ -9,14 +9,14 @@ tools for testing linux stable
 
 * Summary
 
-  This tool is for testing stable kernel automaticall. If you run
-  this tool, you can build, install, boot, and run any test as you
+  This tool is for testing stable kernel automatically. If you run
+  this tool, you can build, install, boot, and run any tests as you
   like with any release candidate stable kernels.
 
-* Pre-requirement to run this tool.
+* Pre-requirement to run this tool
 
  - A host machine and a guest machine running on that host.
-   Both are x86_64 system.
+   Both are x86_64 systems.
  - Host side:
    - You can connect to guest's console via
      "virsh console <guest name>".
@@ -24,11 +24,13 @@ tools for testing linux stable
      password/passphrase.
 
        NOTE:
-       If password/passphrase are absolutely is needed,
-       this tools works fine, however, you need to input
+       Even if password/passphrase are absolutely needed,
+       this tool works fine, however, you need to input
        them many time.
-   - You can reboot the guest via
-     "virsh destroy/start <guest name>".
+   - You can reboot the guest by combination of following
+     commands.
+     "virsh destroy <guest name>".
+     "virsh start <guest name>".
  - Guest side:
    - grub2 is used as bootloader.
    - grub-reboot or grub2-reboot works properly.
@@ -42,7 +44,7 @@ tools for testing linux stable
    system's config file. Although the detail would be different
    with other distros, the name of menuentry, vmlinuz image,
    and initrd image shouldn't be changed.
-   
+
 ===============================================
 ...
 menuentry 'test-stable' {
