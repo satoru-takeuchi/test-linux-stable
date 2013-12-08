@@ -23,6 +23,8 @@ function set_ktest_options {
     sed -i "s|@@MKINITRD@@|${MKINITRD}|" ${KTEST_CONFIG_FILE}
     sed -i "s|@@LOG_FILE@@|${LOG_FILE}|" ${KTEST_CONFIG_FILE}
     sed -i "s|@@TESTS_DIR@@|${TESTS_DIR}|" ${KTEST_CONFIG_FILE}
+    sed -i "s|@@TEST_TYPE@@|${TEST_TYPE}|" ${KTEST_CONFIG_FILE}
+    sed -i "s|@@TEST@@|${TESTS_DIR}/${TEST}|" ${KTEST_CONFIG_FILE}
 }
 
 function get_patch {
