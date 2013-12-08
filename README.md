@@ -88,4 +88,8 @@ $ bin/test-linux-stable <version>
 $ bin/test-linux-stable 3.12.2-rc1
 ===================================
 
-  The test result is in log/test-stable.log
+  The test result is under results/<version>_<test datetime>.
+
+    - log.txt: test log
+    - kernel-config: .config of the kernel
+    - ktest-config: the ktest config file.
