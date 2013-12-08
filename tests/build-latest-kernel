@@ -8,7 +8,6 @@ function usage {
 while getopts "c:" OPT ; do
     case ${OPT} in
 	c)
-	    echo aho
 	    CONFIG_FILE=${OPTARG}
 	    ;;
 	\?)
