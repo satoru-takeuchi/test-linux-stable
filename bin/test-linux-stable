@@ -2,12 +2,6 @@
 
 . test-linux-stable.conf
 
-function make_directories {
-    mkdir -p ${RESULT_DIR}
-    mkdir -p ${PATCH_DIR}
-    mkdir -p ${OUTPUT_DIR}
-}
-
 function set_ktest_options {
     CONCURRENT_LEVEL=$(($(grep -c processor /proc/cpuinfo)*2))
 
@@ -101,7 +95,6 @@ if [ ! -d ${GIT_REPO_DIR} ] ; then
     git clone ${STABLE_GIT_REPO}
 fi
 
-make_directories
 set_ktest_options
 get_patch
 apply_patch
