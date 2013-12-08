@@ -1,7 +1,7 @@
 DEFAULTS
 MACHINE = @@MACHINE@@
 
-LOG_FILE = ${PWD}/log/test-stable.log
+LOG_FILE = @@LOG_FILE@@
 CLEAR_LOG = 1
 
 LOCALVERSION = -test-stable
