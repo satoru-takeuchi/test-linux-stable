@@ -29,7 +29,23 @@ GRUB_REBOOT = @@GRUB_REBOOT@@
 
 TEST_START
 
-TEST_TYPE = boot
+# Please select just one "TEST_TYPE" from the following candidates.
 #
+# - boot (DEFAULT):
+#     Just build and boot the target kernel.
+# - test:
+#     boot and run the test which you like.
+TEST_TYPE = boot
 #TEST_TYPE = test
-#TEST = ssh ${SSH_USER}@${MACHINE} echo hello
+
+# Please Select just one TEST from the following candidates
+# If you selected "test" as "TEST_TYPE".
+#
+# - run-hello:
+#     Just issue "echo hello" in the target kernel.
+#     It's a sample test.
+# - run-build-latest-kernel:
+#     build the latest kernel in the target kernel.
+# 
+#TEST = @@TESTS_DIR@@/run-hello
+#TEST = @@TESTS_DIR@@/run-build-latest-kernel

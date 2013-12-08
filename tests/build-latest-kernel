@@ -1,0 +1,42 @@
+#!/bin/bash
+
+function usage {
+  echo "usage: $0 [-c <base config file> ]" >&2
+  exit 1    
+}
+
+while getopts "c:" OPT ; do
+    case ${OPT} in
+	c)
+	    echo aho
+	    CONFIG_FILE=${OPTARG}
+	    ;;
+	\?)
+	    usage
+	    ;;
+    esac
+done
+
+STABLE_GIT_REPO=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
+BUILD_DIR=linux-stable
+
+# get stable tree if necessary. Should we re-use the host side stable tree?
+if [ ! -d ${BUILD_DIR} ] ; then
+    git clone ${STABLE_GIT_REPO}
+fi
+
+cd ${BUILD_DIR}
+
+# build
+git checkout master
+git pull
+make mrproper
+
+if [ -n "${CONFIG_FILE}" ] ; then
+    cp ${CONFIG_FILE} .config
+else
+    cp /boot/config-$(uname -r) .config
+fi
+
+make olddefconfig
+make -j$((2*$(grep -c processor /proc/cpuinfo)))

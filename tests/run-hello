@@ -1,0 +1,3 @@
+#!/bin/bash
+
+ssh ${SSH_USER}@${MACHINE} echo hello
