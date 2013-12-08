@@ -3,7 +3,7 @@
 . test-linux-stable.conf
 
 function make_directories {
-    mkdir -p ${LOG_DIR}
+    mkdir -p ${RESULT_DIR}
     mkdir -p ${PATCH_DIR}
     mkdir -p ${OUTPUT_DIR}
 }
@@ -63,6 +63,8 @@ function apply_patch {
 
 function run_test {
     ${KTEST} ${KTEST_CONFIG_FILE}
+    cp ${OUTPUT_DIR}/.config ${RESULT_DIR}/kernel-config
+    cp ${KTEST_CONFIG_FILE} ${RESULT_DIR}/ktest-config
 }
 
 while getopts "c:" flag ; do
@@ -85,8 +87,10 @@ STABLE_GIT_REPO=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stabl
 PATCH_DIR=${PWD}/patches
 BASE_KTEST_CONFIG_FILE=${PWD}/ktest.conf.base
 KTEST_CONFIG_FILE=${PWD}/ktest.conf
-LOG_DIR=${PWD}/log
-LOG_FILE=${LOG_DIR}/test-stable-${VERSION}-$(date --rfc-3339=seconds | sed -e 's/ /_/').log
+RESULTS_DIR=${PWD}/results
+TEST_ID=${VERSION}-$(date --rfc-3339=seconds | sed -e 's/ /_/')
+RESULT_DIR=${RESULTS_DIR}/${TEST_ID}
+LOG_FILE=${RESULT_DIR}/log.txt
 OUTPUT_DIR=${PWD}/build
 export BASE_WORKING_DIR=${PWD}
 export TESTS_DIR=${BASE_WORKING_DIR}/tests
