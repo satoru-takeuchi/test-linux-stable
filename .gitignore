@@ -1,0 +1,7 @@
+*~
+ktest.conf
+log/*
+patches/*
+results/*
+build/*
+linux-stable/*
