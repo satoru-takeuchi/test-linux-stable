@@ -95,6 +95,8 @@ if [ ! -d ${GIT_REPO_DIR} ] ; then
     git clone ${STABLE_GIT_REPO}
 fi
 
+mkdir -p $RESULT_DIR
+
 set_ktest_options
 get_patch
 apply_patch
