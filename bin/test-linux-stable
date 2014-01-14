@@ -19,17 +19,37 @@ function set_ktest_options {
     sed -i "s|@@TESTS_DIR@@|${TESTS_DIR}|" ${KTEST_CONFIG_FILE}
     sed -i "s|@@TEST_TYPE@@|${TEST_TYPE}|" ${KTEST_CONFIG_FILE}
     sed -i "s|@@TEST@@|${TESTS_DIR}/${TEST}|" ${KTEST_CONFIG_FILE}
+
+    test -x "${UNXZ}" || UNXZ=$(which unxz)
+    test -x "${GUNZIP}" || GUNZIP=$(which gunzip)
+    if [ -x "${UNXZ}" ] ; then
+	CMP_TYPE=xz
+	UNCMP=${UNXZ}
+    elif [ -x "${GUNZIP}" ] ; then
+	CMP_TYPE=gz
+	UNCMP=${GUNZIP}
+    else
+	echo <<EOF >&2
+This program requires 'unxz' or 'gunzip', however you seem not
+to have either of them. Please install at least one of them.
+If you have it, set PATH environment variable correctly or set
+their path to UNXZ variable or GUNZIP variable.
+EOF
+	exit 1
+    fi
 }
 
 function get_patch {
     PATCH_FILE=patch-${VERSION}
+    CMP_PATCH_FILE=${PATCH_FILE}.${CMP_TYPE}
+    PATCH_REPO_URI=http://www.kernel.org/pub/linux/kernel/v3.0/stable-review
 
     pushd $PATCH_DIR
     if [ ! -f ${PATCH_FILE} ] ; then
-	if [ ! -f ${PATCH_FILE}.bz2 ] ; then
-	    wget http://kernel.org/pub/linux/kernel/v3.0/stable-review/${PATCH_FILE}.bz2 -O ${PATCH_FILE}.bz2
+	if [ ! -f ${CMP_PATCH_FILE} ] ; then
+	    wget ${PATCH_REPO_URI}/${CMP_PATCH_FILE} -O ${CMP_PATCH_FILE}
 	fi
-	bunzip2 ${PATCH_FILE}.bz2
+	${UNCMP} ${CMP_PATCH_FILE}
     fi
     popd
 }
