@@ -2,7 +2,18 @@
 
 . test-linux-stable.conf
 
-function set_ktest_options {
+function set_ktest {
+    local UPSTREAM_KTEST=tools/testing/ktest
+
+    if [ -z "${KTEST}" ] ; then
+	pushd ${GIT_REPO_DIR}
+	git checkout -f master
+	git pull
+	KTEST=${BASE_WORKING_DIR}/bin/ktest.pl
+	cp ${UPSTREAM_KTEST}/ktest.pl ${KTEST}
+	popd
+    fi
+
     CONCURRENT_LEVEL=$(($(grep -c processor /proc/cpuinfo)*2))
 
     cp ${BASE_KTEST_CONFIG_FILE} ${KTEST_CONFIG_FILE}
@@ -117,7 +128,7 @@ fi
 
 mkdir -p $RESULT_DIR
 
-set_ktest_options
+set_ktest
 get_patch
 apply_patch
 run_test
