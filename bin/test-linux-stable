@@ -104,7 +104,7 @@ PATCH_DIR=${PWD}/patches
 BASE_KTEST_CONFIG_FILE=${PWD}/ktest.conf.base
 KTEST_CONFIG_FILE=${PWD}/ktest.conf
 RESULTS_DIR=${PWD}/results
-TEST_ID=${VERSION}-$(date --rfc-3339=seconds | sed -e 's/ /_/')
+TEST_ID=${VERSION}-$(date +%F-%T-%Z | sed -e 's/:/_/g')
 RESULT_DIR=${RESULTS_DIR}/${TEST_ID}
 LOG_FILE=${RESULT_DIR}/log.txt
 OUTPUT_DIR=${PWD}/build
