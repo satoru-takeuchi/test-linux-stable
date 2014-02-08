@@ -88,10 +88,37 @@ function apply_patch {
     popd
 }
 
+function check_error {
+    local RET=$?
+    local MSG="$1"
+
+    if [ $# -lt 1 ] ; then
+	"$0: usage $0 <error message>"
+	exit 1
+    fi
+
+    if [ ${RET} != 0 ] ; then
+	ERR_CODE="$RET"
+	ERR_MSG="$MSG"
+    fi
+    return ${RET}
+}
+
+function exit_on_error {
+    if [ ${ERR_CODE} != 0 ] ; then
+	echo "${ERR_MSG}" >&2
+	exit ${ERR_CODE}
+    fi
+}
+
 function run_test {
     ${KTEST} ${KTEST_CONFIG_FILE}
+    check_error "ktest failed."
+
     cp ${OUTPUT_DIR}/.config ${RESULT_DIR}/kernel-config
     cp ${KTEST_CONFIG_FILE} ${RESULT_DIR}/ktest-config
+    
+    exit_on_error
 }
 
 while getopts "c:" flag ; do
