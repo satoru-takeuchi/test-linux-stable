@@ -3,51 +3,77 @@
 . test-linux-stable.conf
 
 function set_ktest {
-    local UPSTREAM_KTEST=tools/testing/ktest
+    local UPSTREAM_KTEST=tools/testing/ktest/ktest.pl
 
     if [ -z "${KTEST}" ] ; then
+	# get the latest ktest
 	pushd ${GIT_REPO_DIR}
-	git checkout -f master
-	git pull
-	KTEST=${BASE_WORKING_DIR}/bin/ktest.pl
-	cp ${UPSTREAM_KTEST}/ktest.pl ${KTEST}
+
+	while true ; do
+	    git checkout -f master
+	    check_error "$0: failed to checkout the latest stable tree: git_repo_dir:${GIT_REPO_DIR}" || break
+
+	    git pull
+	    check_error "$0: failed to pull the latest stable tree: git_repo_dir:${GIT_REPO_DIR}" || break
+
+	    KTEST=${BASE_WORKING_DIR}/bin/ktest.pl
+	    cp ${UPSTREAM_KTEST} ${KTEST}
+	    check_error "$0: failed to copy the upstream ktest: from:${UPSTREAM_KTEST}, to:${KTEST}" || break
+
+	    break
+	done
+
 	popd
+
+	exit_on_error
     fi
 
-    CONCURRENT_LEVEL=$(($(grep -c processor /proc/cpuinfo)*2))
+    while true ; do
+	CONCURRENT_LEVEL=$(($(grep -c processor /proc/cpuinfo)*2))
+	if [[ ! "${CONCURRENT_LEVEL}" =~ ^[[:digit:]]+$ ]] ; then
+	    check_error "$0: failed to guess the build concurrent value by reading /proc/cpuinfo.
+guessed value is ${CONCURRENT_LEVEL}." || break
+	fi
 
-    cp ${BASE_KTEST_CONFIG_FILE} ${KTEST_CONFIG_FILE}
-    sed -i "s|@@MACHINE@@|${MACHINE}|" ${KTEST_CONFIG_FILE}
-    sed -i "s|@@CONCURRENT_LEVEL@@|${CONCURRENT_LEVEL}|" ${KTEST_CONFIG_FILE}
-    sed -i "s|@@BUILD_DIR@@|${GIT_REPO_DIR}|" ${KTEST_CONFIG_FILE}
-    sed -i "s|@@OUTPUT_DIR@@|${OUTPUT_DIR}|" ${KTEST_CONFIG_FILE}
-    sed -i "s|@@BUILD_TYPE@@|${BUILD_TYPE}|" ${KTEST_CONFIG_FILE}
-    sed -i "s|@@MIN_CONFIG@@|${BASE_KERNEL_CONFIG_FILE}|" ${KTEST_CONFIG_FILE}
-    sed -i "s|@@GRUB_FILE@@|${GRUB_CONFIG_FILE}|" ${KTEST_CONFIG_FILE}
-    sed -i "s|@@GRUB_REBOOT@@|${GRUB_REBOOT}|" ${KTEST_CONFIG_FILE}
-    sed -i "s|@@MKINITRD@@|${MKINITRD}|" ${KTEST_CONFIG_FILE}
-    sed -i "s|@@LOG_FILE@@|${LOG_FILE}|" ${KTEST_CONFIG_FILE}
-    sed -i "s|@@TESTS_DIR@@|${TESTS_DIR}|" ${KTEST_CONFIG_FILE}
-    sed -i "s|@@TEST_TYPE@@|${TEST_TYPE}|" ${KTEST_CONFIG_FILE}
-    sed -i "s|@@TEST@@|${TESTS_DIR}/${TEST}|" ${KTEST_CONFIG_FILE}
+	# generate the configfile of ktest
+	cp ${BASE_KTEST_CONFIG_FILE} ${KTEST_CONFIG_FILE} &&
+	sed -i "s|@@MACHINE@@|${MACHINE}|" ${KTEST_CONFIG_FILE} &&
+	sed -i "s|@@CONCURRENT_LEVEL@@|${CONCURRENT_LEVEL}|" ${KTEST_CONFIG_FILE} &&
+	sed -i "s|@@BUILD_DIR@@|${GIT_REPO_DIR}|" ${KTEST_CONFIG_FILE} &&
+	sed -i "s|@@OUTPUT_DIR@@|${OUTPUT_DIR}|" ${KTEST_CONFIG_FILE} &&
+	sed -i "s|@@BUILD_TYPE@@|${BUILD_TYPE}|" ${KTEST_CONFIG_FILE} &&
+	sed -i "s|@@MIN_CONFIG@@|${BASE_KERNEL_CONFIG_FILE}|" ${KTEST_CONFIG_FILE} &&
+	sed -i "s|@@GRUB_FILE@@|${GRUB_CONFIG_FILE}|" ${KTEST_CONFIG_FILE} &&
+	sed -i "s|@@GRUB_REBOOT@@|${GRUB_REBOOT}|" ${KTEST_CONFIG_FILE} &&
+	sed -i "s|@@MKINITRD@@|${MKINITRD}|" ${KTEST_CONFIG_FILE} &&
+	sed -i "s|@@LOG_FILE@@|${LOG_FILE}|" ${KTEST_CONFIG_FILE} &&
+	sed -i "s|@@TESTS_DIR@@|${TESTS_DIR}|" ${KTEST_CONFIG_FILE} &&
+	sed -i "s|@@TEST_TYPE@@|${TEST_TYPE}|" ${KTEST_CONFIG_FILE} && 
+	sed -i "s|@@TEST@@|${TESTS_DIR}/${TEST}|" ${KTEST_CONFIG_FILE}
+	check_error "$0: failed to generate the config file from ${BASE_KTEST_CONFIG_FILE} to ${KTEST_CONFIG_FILE}" || break
 
-    test -x "${UNXZ}" || UNXZ=$(which unxz)
-    test -x "${GUNZIP}" || GUNZIP=$(which gunzip)
-    if [ -x "${UNXZ}" ] ; then
-	CMP_TYPE=xz
-	UNCMP=${UNXZ}
-    elif [ -x "${GUNZIP}" ] ; then
-	CMP_TYPE=gz
-	UNCMP=${GUNZIP}
-    else
-	echo <<EOF >&2
+	# set the uncompress programs
+	test -x "${UNXZ}" || UNXZ=$(which unxz)
+	test -x "${GUNZIP}" || GUNZIP=$(which gunzip)
+	if [ -x "${UNXZ}" ] ; then
+	    CMP_TYPE=xz
+	    UNCMP=${UNXZ}
+	elif [ -x "${GUNZIP}" ] ; then
+	    CMP_TYPE=gz
+	    UNCMP=${GUNZIP}
+	else
+	    echo <<EOF >&2
 This program requires 'unxz' or 'gunzip', however you seem not
-to have either of them. Please install at least one of them.
+to have neither of them. Please install at least one of them.
 If you have it, set PATH environment variable correctly or set
 their path to UNXZ variable or GUNZIP variable.
 EOF
-	exit 1
-    fi
+	    exit 1
+	fi
+	break
+    done
+
+    exit_on_error
 }
 
 function get_patch {
@@ -56,9 +82,10 @@ function get_patch {
     PATCH_REPO_URI=http://www.kernel.org/pub/linux/kernel/v3.0/stable-review
 
     pushd $PATCH_DIR
-    if [ ! -f ${PATCH_FILE} ] ; then
-	if [ ! -f ${CMP_PATCH_FILE} ] ; then
+    if [ ! -f "${PATCH_FILE}" ] ; then
+	if [ ! -f "${CMP_PATCH_FILE}" ] ; then
 	    wget ${PATCH_REPO_URI}/${CMP_PATCH_FILE} -O ${CMP_PATCH_FILE}
+	    
 	fi
 	${UNCMP} ${CMP_PATCH_FILE}
     fi
@@ -66,12 +93,12 @@ function get_patch {
 }
 
 function apply_patch {
-    [[ $VERSION =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]]
+    [[ "$VERSION" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]]
     X_VERSION=${BASH_REMATCH[1]}
     Y_VERSION=${BASH_REMATCH[2]}
     Z_VERSION=${BASH_REMATCH[3]}
 
-    if [ $Z_VERSION = 1 ] ; then
+    if [ "$Z_VERSION" = 1 ] ; then
 	LAST_STABLE_VERSION="${X_VERSION}.${Y_VERSION}"
     else
 	LAST_STABLE_VERSION="${X_VERSION}.${Y_VERSION}.$((Z_VERSION - 1))"
@@ -88,6 +115,11 @@ function apply_patch {
     popd
 }
 
+function init_check_error {
+    ERR_CODE=0
+    ERR_MSG=
+}
+
 function check_error {
     local RET=$?
     local MSG="$1"
@@ -97,17 +129,17 @@ function check_error {
 	exit 1
     fi
 
-    if [ ${RET} != 0 ] ; then
-	ERR_CODE="$RET"
+    if [ "${RET}" != 0 ] ; then
+	ERR_CODE="${RET}"
 	ERR_MSG="$MSG"
     fi
     return ${RET}
 }
 
 function exit_on_error {
-    if [ ${ERR_CODE} != 0 ] ; then
+    if [ "${ERR_CODE}" != 0 ] ; then
 	echo "${ERR_MSG}" >&2
-	exit ${ERR_CODE}
+	exit "${ERR_CODE}"
     fi
 }
 
@@ -149,12 +181,13 @@ OUTPUT_DIR=${PWD}/build
 export BASE_WORKING_DIR=${PWD}
 export TESTS_DIR=${BASE_WORKING_DIR}/tests
 
-if [ ! -d ${GIT_REPO_DIR} ] ; then
+if [ ! -d "${GIT_REPO_DIR}" ] ; then
     git clone ${STABLE_GIT_REPO}
 fi
 
 mkdir -p $RESULT_DIR
 
+init_check_error
 set_ktest
 get_patch
 apply_patch
