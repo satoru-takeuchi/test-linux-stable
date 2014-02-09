@@ -112,14 +112,32 @@ function apply_patch {
     fi
 
     pushd ${GIT_REPO_DIR}
-    git checkout master
-    git pull
-    git checkout v${LAST_STABLE_VERSION}
-    git branch -D v${VERSION} || :
-    git checkout -b v${VERSION}
-    git apply ${PATCH_DIR}/${PATCH_FILE}
-    git commit -a -m "v${VERSION}"
+    while true ; do
+	git checkout master
+	check_error "$0: failed to checkout master at '${GIT_REPO_DIR}'" || break
+
+	git pull
+	check_error "$0: failed to pull from the latest stable tree at '${GIT_REPO_DIR}'" || break
+
+	git checkout v${LAST_STABLE_VERSION}
+	check_error "$0: failed to checkout 'v${LAST_STABLE_VERSION}' at '${GIT_REPO_DIR}'" || break
+
+	git branch -D v${VERSION} || :
+
+	git checkout -b v${VERSION}
+	check_error "$0: failed to checkout a new branch 'v${VERSION}' at '${GIT_REPO_DIR}'" || break
+
+	git apply ${PATCH_DIR}/${PATCH_FILE}
+	check_error "$0: failed to apply '${PATCH_DIR}/${PATCH_FILE}' at '${GIT_REPO_DIR}'" || break
+
+	git commit -a -m "v${VERSION}"
+	check_error "$0: failed to commit at '${GIT_REPO_DIR}'" || break
+
+	break;
+    done
     popd
+
+    exit_on_error
 }
 
 function init_check_error {
