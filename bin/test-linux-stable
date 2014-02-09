@@ -82,14 +82,21 @@ function get_patch {
     PATCH_REPO_URI=http://www.kernel.org/pub/linux/kernel/v3.0/stable-review
 
     pushd $PATCH_DIR
-    if [ ! -f "${PATCH_FILE}" ] ; then
-	if [ ! -f "${CMP_PATCH_FILE}" ] ; then
-	    wget ${PATCH_REPO_URI}/${CMP_PATCH_FILE} -O ${CMP_PATCH_FILE}
-	    
+    while true ; do
+	if [ ! -f "${PATCH_FILE}" ] ; then
+	    if [ ! -f "${CMP_PATCH_FILE}" ] ; then
+		local TARGET
+		TARGET=${PATCH_REPO_URI}/${CMP_PATCH_FILE}
+		wget ${TARGET} -O ${CMP_PATCH_FILE}
+		check_error "$0: failed to get patch '${TARGET}'" || break
+	    fi
+	    ${UNCMP} ${CMP_PATCH_FILE}
+	    check_error "$0: failed to uncompress patch '${CMP_PATCH_FILE}' by '${UNCMP}'" || break
 	fi
-	${UNCMP} ${CMP_PATCH_FILE}
-    fi
+	break
+    done
     popd
+    exit_on_error
 }
 
 function apply_patch {
