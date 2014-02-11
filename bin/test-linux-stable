@@ -213,7 +213,7 @@ function parse_params {
     while getopts "c:" flag ; do
 	case ${flag} in
 	    c)
-		CONFIG_FILE=${OPTARG}
+		BASE_KERNEL_CONFIG_FILE=${OPTARG}
 		;;
 	esac
     done
