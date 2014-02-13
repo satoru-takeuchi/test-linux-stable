@@ -206,7 +206,7 @@ function init {
     parse_params "$@"
     init_env
     set_ktest
-    set_ktest_conf
+    set_ktest_config
 }
 
 function parse_params {
