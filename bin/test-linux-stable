@@ -79,7 +79,14 @@ EOF
 function get_patch {
     PATCH_FILE=patch-${VERSION}
     CMP_PATCH_FILE=${PATCH_FILE}.${CMP_TYPE}
-    PATCH_REPO_URI=http://www.kernel.org/pub/linux/kernel/v3.0/stable-review
+
+    if [ ${Y_VERSION} -eq 12 ] ; then
+	# Jiri
+	PATCH_REPO_URI=http://kernel.org/pub/linux/kernel/people/jirislaby/stable-review
+    else
+	# Greg
+	PATCH_REPO_URI=http://www.kernel.org/pub/linux/kernel/v3.0/stable-review
+    fi
 
     pushd $PATCH_DIR
     while true ; do
@@ -100,11 +107,6 @@ function get_patch {
 }
 
 function apply_patch {
-    [[ "$VERSION" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]]
-    X_VERSION=${BASH_REMATCH[1]}
-    Y_VERSION=${BASH_REMATCH[2]}
-    Z_VERSION=${BASH_REMATCH[3]}
-
     if [ "$Z_VERSION" = 1 ] ; then
 	LAST_STABLE_VERSION="${X_VERSION}.${Y_VERSION}"
     else
@@ -200,6 +202,11 @@ function init_env {
     fi
 
     mkdir -p $RESULT_DIR
+
+    [[ "$VERSION" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]]
+    X_VERSION=${BASH_REMATCH[1]}
+    Y_VERSION=${BASH_REMATCH[2]}
+    Z_VERSION=${BASH_REMATCH[3]}
 }
 
 function init {
