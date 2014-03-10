@@ -28,6 +28,17 @@ function set_ktest {
 }
 
 function set_ktest_config {
+    TEST_ID=${VERSION}-$(date +%F-%T-%Z | sed -e 's/:/_/g')
+    RESULT_DIR=${RESULTS_DIR}/${TEST_ID}
+    LOG_FILE=${RESULT_DIR}/log.txt
+
+    mkdir -p $RESULT_DIR
+
+    [[ "$VERSION" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]]
+    X_VERSION=${BASH_REMATCH[1]}
+    Y_VERSION=${BASH_REMATCH[2]}
+    Z_VERSION=${BASH_REMATCH[3]}
+
     while true ; do
 	CONCURRENT_LEVEL=$(($(grep -c processor /proc/cpuinfo)*2))
 	if [[ ! "${CONCURRENT_LEVEL}" =~ ^[[:digit:]]+$ ]] ; then
@@ -186,9 +197,6 @@ function init_env {
     BASE_KTEST_CONFIG_FILE=${PWD}/ktest.conf.base
     KTEST_CONFIG_FILE=${PWD}/ktest.conf
     RESULTS_DIR=${PWD}/results
-    TEST_ID=${VERSION}-$(date +%F-%T-%Z | sed -e 's/:/_/g')
-    RESULT_DIR=${RESULTS_DIR}/${TEST_ID}
-    LOG_FILE=${RESULT_DIR}/log.txt
     OUTPUT_DIR=${PWD}/build
     export BASE_WORKING_DIR=${PWD}
     export TESTS_DIR=${BASE_WORKING_DIR}/tests
@@ -200,20 +208,11 @@ function init_env {
     if [ ! -d "${GIT_REPO_DIR}" ] ; then
 	git clone ${STABLE_GIT_REPO}
     fi
-
-    mkdir -p $RESULT_DIR
-
-    [[ "$VERSION" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]]
-    X_VERSION=${BASH_REMATCH[1]}
-    Y_VERSION=${BASH_REMATCH[2]}
-    Z_VERSION=${BASH_REMATCH[3]}
 }
 
 function init {
-    parse_params "$@"
     init_env
     set_ktest
-    set_ktest_config
 }
 
 function parse_params {
@@ -231,12 +230,17 @@ function parse_params {
 	echo "usage: ${PROGRAM_NAME} [options] <version>" >&2
 	exit 1
     fi
-    VERSION=$1
+    VERSIONS=$@
 }
 
 PROGRAM_NAME=$0
 
-init "$@"
-get_patch
-apply_patch
-run_test
+parse_params "$@"
+init
+
+for VERSION in $VERSIONS ; do
+    set_ktest_config
+    get_patch
+    apply_patch
+    run_test
+done
