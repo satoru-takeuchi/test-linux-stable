@@ -50,9 +50,9 @@ A tool for testing linux stable kernel
 menuentry 'test-stable' {
         ...
         echo    'Loading test-stable kernel ...'
-        linux   /boot/vmlinuz-test-stable root=<root device> ro console=ttyS0,115200n8
+        linux   /boot/test-stable-vmlinuz root=<root device> ro console=ttyS0,115200n8
         echo    'Loading initial ramdisk ...'
-        initrd  /boot/initrd.img-test-stable
+        initrd  /boot/test-stable-initrd.img
 }
 ...
 ===============================================

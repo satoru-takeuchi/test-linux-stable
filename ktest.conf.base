@@ -11,7 +11,7 @@ MIN_CONFIG = @@MIN_CONFIG@@
 BUILD_TYPE= @@BUILD_TYPE@@
 BUILD_OPTIONS = -j@@CONCURRENT_LEVEL@@
 BUILD_TARGET = arch/x86/boot/bzImage
-TARGET_IMAGE = /boot/vmlinuz-test-stable
+TARGET_IMAGE = /boot/test-stable-vmlinuz
 
 POST_INSTALL = ssh ${SSH_USER}@${MACHINE} @@MKINITRD@@
 
