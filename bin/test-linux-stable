@@ -60,7 +60,7 @@ guessed value is ${CONCURRENT_LEVEL}." || break
 	sed -i "s|@@LOG_FILE@@|${LOG_FILE}|" ${KTEST_CONFIG_FILE} &&
 	sed -i "s|@@TESTS_DIR@@|${TESTS_DIR}|" ${KTEST_CONFIG_FILE} &&
 	sed -i "s|@@TEST_TYPE@@|${TEST_TYPE}|" ${KTEST_CONFIG_FILE} && 
-	sed -i "s|@@TEST@@|${TESTS_DIR}/${TEST}|" ${KTEST_CONFIG_FILE}
+	sed -i "s|@@TEST@@|${TESTS_DIR}/run-client-test ${TESTS}|" ${KTEST_CONFIG_FILE}
 	check_error "$0: failed to generate the config file from ${BASE_KTEST_CONFIG_FILE} to ${KTEST_CONFIG_FILE}" || break
 
 	# set the uncompress programs

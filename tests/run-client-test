@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [ $# -lt 1 ] ; then
+    echo "usage: $0 <test name>" >&2
+    exit 1
+fi
+
+cd $(dirname $0)
+
+GUEST_BASE_WORKING_DIR=/root/test-linux-stable
+#scp ${BASE_WORKING_DIR}/config.base ${SSH_USER}@${MACHINE}:${GUEST_BASE_WORKING_DIR}/config.base
+
+for TEST_NAME in $@ ; do
+    GUEST_TEST_DIR=${GUEST_BASE_WORKING_DIR}/$TEST_NAME
+    # deploy test
+    scp -r ${TESTS_DIR}/$TEST_NAME ${SSH_USER}@${MACHINE}:${GUEST_BASE_WORKING_DIR}
+    # run test
+    ssh ${SSH_USER}@${MACHINE} "cd ${GUEST_TEST_DIR}; make run" # /${TEST_NAME} -c ${GUEST_BASE_WORKING_DIR}/config.base"
+done
