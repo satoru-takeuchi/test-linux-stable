@@ -1,0 +1,5 @@
+#!/bin/bash
+
+SELFTESTS_DIR=${GIT_REPO_DIR}/tools/testing/selftests
+make O=${GIT_REPO_DIR} -C tools/testing/selftests all
+scp -r ${SELFTESTS_DIR} ${SSH_USER}@${MACHINE}:${GUEST_TEST_DIR}

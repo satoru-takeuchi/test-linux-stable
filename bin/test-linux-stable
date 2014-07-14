@@ -202,6 +202,7 @@ function init_env {
     export TESTS_DIR=${BASE_WORKING_DIR}/tests
 
     . test-linux-stable.conf
+    export GIT_REPO_DIR
 
     init_check_error
 

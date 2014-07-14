@@ -10,9 +10,13 @@ cd $(dirname $0)
 GUEST_BASE_WORKING_DIR=/root/test-linux-stable
 
 for TEST_NAME in $@ ; do
-    GUEST_TEST_DIR=${GUEST_BASE_WORKING_DIR}/$TEST_NAME
+    export TEST_DIR=${TESTS_DIR}/$TEST_NAME
+    export GUEST_TEST_DIR=${GUEST_BASE_WORKING_DIR}/$TEST_NAME
     # deploy test
-    scp -r ${TESTS_DIR}/$TEST_NAME ${SSH_USER}@${MACHINE}:${GUEST_BASE_WORKING_DIR}
+    scp -r ${TEST_DIR} ${SSH_USER}@${MACHINE}:${GUEST_BASE_WORKING_DIR}
+
+    . ${TEST_DIR}/pre-run
+
     # run test
     ssh ${SSH_USER}@${MACHINE} "cd ${GUEST_TEST_DIR}; make run"
 done
