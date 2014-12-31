@@ -1,0 +1,5 @@
+#!/bin/bash -ex
+
+. local.config
+cd xfstests
+./check

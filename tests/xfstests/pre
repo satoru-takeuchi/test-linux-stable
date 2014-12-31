@@ -1,0 +1,19 @@
+#!/bin/bash -ex
+
+. local.config
+
+if [ ! -d xfstests ] ; then
+    git clone git://oss.sgi.com/xfs/cmds/xfstests
+fi
+
+cp local.config xfstests
+cd xfstests
+mkdir -p ${TEST_DIR}
+mkdir -p ${SCRATCH_MNT}
+
+git checkout -f master
+git pull
+make
+
+mkfs.ext4 -F ${TEST_DEV}
+mount ${TEST_DEV} ${TEST_DIR}

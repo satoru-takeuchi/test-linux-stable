@@ -1,0 +1,6 @@
+#!/bin/bash -ex
+
+. local.config
+
+cd xfstests
+umount ${TEST_DIR}
