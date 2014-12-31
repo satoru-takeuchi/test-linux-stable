@@ -1,0 +1,22 @@
+#!/bin/bash -ex
+
+if [ $# -lt 1 ] ; then
+    echo "usage: $0 <test name>" >&2
+    exit 1
+fi
+
+GUEST_BASE_WORKING_DIR=/root/test-linux-stable
+
+cd ${BASE_WORKING_DIR}
+scp -p driver ${SSH_USER}@${MACHINE}:${GUEST_BASE_WORKING_DIR}
+
+for TEST_NAME in $@ ; do
+    export TEST_DIR=${TESTS_DIR}/$TEST_NAME
+    export GUEST_TEST_DIR=${GUEST_BASE_WORKING_DIR}
+
+    # deploy test
+    scp -rp ${TEST_DIR} ${SSH_USER}@${MACHINE}:${GUEST_TEST_DIR}
+
+    # run test
+    ssh ${SSH_USER}@${MACHINE} "cd ${GUEST_BASE_WORKING_DIR}; ./driver ${TEST_NAME}"
+done

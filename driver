@@ -1,0 +1,29 @@
+#!/bin/bash -ex
+
+if [[ $# < 1 ]] ; then
+    echo "usage: $0 <test name>" >&2
+    exit 1
+fi
+
+TEST_NAME=$1
+
+pushd $TEST_NAME
+
+PRE_SUCCESS=1
+if [ -x pre ] ; then
+    ./pre || PRE_SUCCESS=0
+fi
+
+if [[ $PRE_SUCCESS == 1 ]] ; then
+    if [ ! -x run ] ; then
+	echo "test script 'run' is mandatory" >&2
+	exit 1
+    fi
+    ./run || :
+fi
+
+if [[ -x post ]]  ; then
+    ./post || :
+fi
+
+popd
