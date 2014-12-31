@@ -68,6 +68,7 @@ $ cd test-linux-stable
 3. Edit this tool's configuration file (sometimes).
 
   Tweak this tool's configuration file, "test-linux-stable.conf".
+  "test-linux-stable.conf.sample" can be used as a sample.
   Please refer to the comments in this file here.
 
 ====================================
