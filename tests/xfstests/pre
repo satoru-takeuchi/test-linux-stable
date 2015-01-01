@@ -6,13 +6,14 @@ if [ ! -d xfstests ] ; then
     git clone git://oss.sgi.com/xfs/cmds/xfstests
 fi
 
-mkdir -p test_dir
-mkdir -p scratch_mnt
-
 cp local.config xfstests
 cd xfstests
+mkdir -p ${TEST_DIR}
+mkdir -p ${SCRATCH_MNT}
+
 git checkout -f master
 git pull
+./configure
 make
 
 mkfs.ext4 -F ${TEST_DEV}
