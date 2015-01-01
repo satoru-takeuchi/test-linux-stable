@@ -50,6 +50,9 @@ TEST_TYPE=test
 #     It's a sample test.
 # - build-latest-kernel:
 #     build the latest kernel in the target kernel.
+# - xfstests (EXPERIMENTAL):
+#     run xfstests. Please edit tests/xfstests/local.config as you need.
+#
 # - selftests (EXPERIMENTAL):
 #     run make -C tools/testing/selftests. It only support 3.4 or later.
 TESTS='build-latest-kernel'
