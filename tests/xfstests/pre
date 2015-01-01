@@ -13,6 +13,7 @@ mkdir -p ${SCRATCH_MNT}
 
 git checkout -f master
 git pull
+./configure
 make
 
 mkfs.ext4 -F ${TEST_DEV}
